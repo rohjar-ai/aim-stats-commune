@@ -17,6 +17,9 @@ scheduler = BackgroundScheduler()
 data_lock = threading.Lock()
 shared_data = None
 
+with app.app_context():
+    scheduler.start()
+
 def heavy_task():
     global shared_data
     print("Collecting data")
@@ -34,10 +37,6 @@ def index():
 @scheduler.scheduled_job('interval', minutes=10)
 def scheduled_job():
     heavy_task()
-
-@app.before_first_request
-def start_scheduler():
-    scheduler.start()
 
 @app.cli.command()
 def shutdown():
