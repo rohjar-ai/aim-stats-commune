@@ -1,14 +1,11 @@
-from flask import Flask, jsonify
+import threading
 import typer
-from communex.misc import get_map_modules
-from communex.cli._common import make_custom_context, ExtraCtxData
-from communex.types import ModuleInfoWithOptionalBalance
-from flask_cors import CORS
-import json
 
 from apscheduler.schedulers.background import BackgroundScheduler
-import threading
-import time
+from communex.cli._common import make_custom_context, ExtraCtxData
+from communex.misc import get_map_modules
+from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__, template_folder='.')
 CORS(app)
@@ -20,42 +17,40 @@ shared_data = None
 with app.app_context():
     scheduler.start()
 
-def heavy_task():
+
+def collect_in_background():
     global shared_data
     print("Collecting data")
-    collected_data = get_data()
+    collected_data = collect_subnet_data()
     with data_lock:
         shared_data = collected_data
     print("Collecting completed.")
 
+
 @app.route('/')
-def index():
+def home():
     with data_lock:
-        data_to_show = shared_data if shared_data else "No data collected yet."
-    return data_to_show
+        subnet_data = shared_data if shared_data else "Collecting data..."
+    return jsonify(subnet_data)
+
 
 @scheduler.scheduled_job('interval', minutes=10)
 def scheduled_job():
-    heavy_task()
+    collect_in_background()
+
 
 @app.cli.command()
 def shutdown():
     scheduler.shutdown(wait=False)
 
 
-@app.route('/')
-def home():
-    with data_lock:
-        data_to_show = shared_data if shared_data else "No data collected yet."
-    return jsonify(data_to_show)
-
-def get_data():
+def collect_subnet_data():
     ctx = typer.Context
     ctx.obj = ExtraCtxData(output_json=False, use_testnet=False)
     context = make_custom_context(ctx)
     client = context.com_client()
+
     modules = get_map_modules(client, netuid=17, include_balances=False)
-    
     return list(modules.values())
 
 
