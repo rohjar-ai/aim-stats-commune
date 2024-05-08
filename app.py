@@ -6,13 +6,49 @@ from communex.types import ModuleInfoWithOptionalBalance
 from flask_cors import CORS
 import json
 
+from apscheduler.schedulers.background import BackgroundScheduler
+import threading
+import time
+
 app = Flask(__name__, template_folder='.')
 CORS(app)
 
+scheduler = BackgroundScheduler()
+data_lock = threading.Lock()
+shared_data = None
+
+def heavy_task():
+    global shared_data
+    print("Collecting data")
+    collected_data = get_data()
+    with data_lock:
+        shared_data = collected_data
+    print("Collecting completed.")
+
+@app.route('/')
+def index():
+    with data_lock:
+        data_to_show = shared_data if shared_data else "No data collected yet."
+    return f"Hello, World! Here's the latest update: {data_to_show}"
+
+@scheduler.scheduled_job('interval', minutes=10)
+def scheduled_job():
+    heavy_task()
+
+@app.before_first_request
+def start_scheduler():
+    scheduler.start()
+
+@app.cli.command()
+def shutdown():
+    scheduler.shutdown(wait=False)
+
+
 @app.route('/')
 def home():
-    data = get_data()
-    return jsonify(data)
+    with data_lock:
+        data_to_show = shared_data if shared_data else "No data collected yet."
+    return jsonify(data_to_show)
 
 def get_data():
     ctx = typer.Context
@@ -22,6 +58,7 @@ def get_data():
     modules = get_map_modules(client, netuid=17, include_balances=False)
     
     return list(modules.values())
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
