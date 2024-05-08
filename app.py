@@ -32,7 +32,7 @@ def heavy_task():
 def index():
     with data_lock:
         data_to_show = shared_data if shared_data else "No data collected yet."
-    return f"Hello, World! Here's the latest update: {data_to_show}"
+    return data_to_show
 
 @scheduler.scheduled_job('interval', minutes=10)
 def scheduled_job():
