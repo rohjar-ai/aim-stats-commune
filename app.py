@@ -14,9 +14,6 @@ scheduler = BackgroundScheduler()
 data_lock = threading.Lock()
 shared_data = None
 
-with app.app_context():
-    scheduler.start()
-
 
 def collect_in_background():
     global shared_data
@@ -25,6 +22,11 @@ def collect_in_background():
     with data_lock:
         shared_data = collected_data
     print("Collecting completed.")
+
+
+with app.app_context():
+    scheduler.add_job(collect_in_background, 'date')
+    scheduler.start()
 
 
 @app.route('/')
@@ -46,7 +48,7 @@ def shutdown():
 
 def collect_subnet_data():
     ctx = typer.Context
-    ctx.obj = ExtraCtxData(output_json=False, use_testnet=False)
+    ctx.obj = ExtraCtxData(output_json=False, use_testnet=False, yes_to_all=False)
     context = make_custom_context(ctx)
     client = context.com_client()
 
