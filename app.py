@@ -15,6 +15,16 @@ data_lock = threading.Lock()
 shared_data = None
 
 
+def collect_subnet_data():
+    ctx = typer.Context
+    ctx.obj = ExtraCtxData(output_json=False, use_testnet=False, yes_to_all=False)
+    context = make_custom_context(ctx)
+    client = context.com_client()
+
+    modules = get_map_modules(client, netuid=17, include_balances=False)
+    return list(modules.values())
+
+
 def collect_in_background():
     global shared_data
     print("Collecting data")
@@ -44,16 +54,6 @@ def scheduled_job():
 @app.cli.command()
 def shutdown():
     scheduler.shutdown(wait=False)
-
-
-def collect_subnet_data():
-    ctx = typer.Context
-    ctx.obj = ExtraCtxData(output_json=False, use_testnet=False, yes_to_all=False)
-    context = make_custom_context(ctx)
-    client = context.com_client()
-
-    modules = get_map_modules(client, netuid=17, include_balances=False)
-    return list(modules.values())
 
 
 if __name__ == '__main__':
