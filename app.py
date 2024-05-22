@@ -46,7 +46,7 @@ def home():
     return jsonify(subnet_data)
 
 
-@scheduler.scheduled_job('interval', minutes=10)
+@scheduler.scheduled_job('interval', minutes=5)
 def scheduled_job():
     collect_in_background()
 
