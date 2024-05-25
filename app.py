@@ -6,6 +6,8 @@ from communex.cli._common import make_custom_context, ExtraCtxData
 from communex.misc import get_map_modules
 from flask import Flask, jsonify
 from flask_cors import CORS
+from datetime import datetime
+
 
 app = Flask(__name__, template_folder='.')
 CORS(app)
@@ -27,7 +29,7 @@ def collect_subnet_data():
 
 def collect_in_background():
     global shared_data
-    print("Collecting data")
+    print(f"Collecting data: {datetime.now()}")
     collected_data = collect_subnet_data()
     with data_lock:
         shared_data = collected_data
