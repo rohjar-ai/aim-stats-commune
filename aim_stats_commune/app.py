@@ -4,10 +4,10 @@ import typer
 from apscheduler.schedulers.background import BackgroundScheduler
 from communex.cli._common import make_custom_context, ExtraCtxData
 from communex.misc import get_map_modules
+from datetime import datetime
+from discord_delegate import send_message
 from flask import Flask, jsonify
 from flask_cors import CORS
-from datetime import datetime
-
 
 app = Flask(__name__, template_folder='.')
 CORS(app)
@@ -24,6 +24,8 @@ def collect_subnet_data():
     client = context.com_client()
 
     modules = get_map_modules(client, netuid=17, include_balances=False)
+    if not modules:
+        send_message()
     return list(modules.values())
 
 
@@ -56,6 +58,10 @@ def scheduled_job():
 @app.cli.command()
 def shutdown():
     scheduler.shutdown(wait=False)
+
+
+def main():
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
 if __name__ == '__main__':
