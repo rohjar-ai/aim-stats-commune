@@ -9,10 +9,9 @@ webhook_token = os.getenv("WEBHOOK_TOKEN")
 webhook_url = f"https://discord.com/api/webhooks/{webhook_id}/{webhook_token}"
 
 
-def send_message():
-    content = f"Error getting modules using comx! Empty list returned."
+def send_message(message: str):
     payload = {
-        "content": content,
+        "content": message,
         "username": "AIM stats commune"
     }
 

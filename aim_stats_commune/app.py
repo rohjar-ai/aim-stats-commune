@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from communex.cli._common import make_custom_context, ExtraCtxData
 from communex.misc import get_map_modules
 from datetime import datetime
-from discord_delegate import send_message
+from aim_stats_commune.discord_delegate import send_message
 from flask import Flask, jsonify
 from flask_cors import CORS
 
@@ -25,7 +25,10 @@ def collect_subnet_data():
 
     modules = get_map_modules(client, netuid=17, include_balances=False)
     if not modules:
-        send_message()
+        send_message("Error getting modules using comx! Empty list returned. Retrying...")
+        modules = get_map_modules(client, netuid=17, include_balances=False)
+        if not modules:
+            send_message("Error getting modules using comx! Empty list returned again.")
     return list(modules.values())
 
 
