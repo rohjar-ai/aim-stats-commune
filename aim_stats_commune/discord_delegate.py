@@ -1,7 +1,8 @@
 import requests
+import os
+
 from dotenv import load_dotenv
 
-import os
 
 load_dotenv()
 webhook_id = os.getenv("WEBHOOK_ID")
@@ -15,7 +16,7 @@ def send_message(message: str):
         "username": "AIM stats commune"
     }
 
-    print(content)
+    print(message)
     response = requests.post(webhook_url, json=payload)
     if response.status_code == 204:
         print("Message sent successfully!")
