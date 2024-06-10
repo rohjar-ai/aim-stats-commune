@@ -7,7 +7,7 @@ from communex.client import CommuneClient
 from communex.misc import get_map_modules
 from communex.types import ModuleInfoWithOptionalBalance
 from datetime import datetime
-from discord_delegate import send_message
+from aim_stats_commune.discord_delegate import send_message
 
 AIM_NET_UID: int = 17
 COLLECT_INTERVAL: int = 5
