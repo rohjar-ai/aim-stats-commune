@@ -1,4 +1,4 @@
-from commune_stats_collector import CommuneStatsCollector
+from aim_stats_commune.commune_stats_collector import CommuneStatsCollector
 from flask import Flask, jsonify
 from flask_cors import CORS
 
