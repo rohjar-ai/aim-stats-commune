@@ -26,7 +26,8 @@ class CommuneStatsCollector:
         self._lock = threading.Lock()
         self._scheduler: BackgroundScheduler = BackgroundScheduler()
 
-        self._scheduler.add_job(self._update_cache, 'interval', minutes=COLLECT_INTERVAL, next_run_time=datetime.now())
+        self._scheduler.add_job(self._update_cache, 'interval', minutes=COLLECT_INTERVAL,
+                                next_run_time=datetime.now())
         self._scheduler.start()
 
         self._collect_attempts: int = 0
@@ -38,13 +39,22 @@ class CommuneStatsCollector:
             send_message("Error getting modules using communex! Empty list returned. Retrying...")
             map_modules = get_map_modules(self.client, netuid=AIM_NET_UID, include_balances=False)
             if not map_modules:
-                send_message("Error getting modules using comx! Empty list returned again.")
+                self._collect_attempts += 1
+                send_message(f"Error getting modules using communex! Empty list returned again. "
+                             f"Failed collect attempt no. {self._collect_attempts}")
 
         print(f"Collecting completed.")
         return list(map_modules.values())
 
     def _update_cache(self):
         update: list[ModuleInfoWithOptionalBalance] = self._collect()
+        if not update:
+            if self._collect_attempts >= 3:
+                send_message("Warning: empty list is about to be displayed by aim stats!")
+                self._collect_attempts = 0
+            else:
+                return
+
         with self._lock:
             self._cache = update
 
