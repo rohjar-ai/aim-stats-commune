@@ -2,4 +2,6 @@ apscheduler
 communex
 flask
 flask_cors
+python-dotenv
+requests
 typer
