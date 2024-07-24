@@ -4,6 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '0.0.0.0:5001:5001'
+      - '0.0.0.0:5000:5000'
     restart: always
     command: ['aim-stats']
